@@ -1,4 +1,6 @@
 import { Globe, Phone, UserPlus, LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
+
 
 export default function NavBar() {
   return (
@@ -24,11 +26,11 @@ export default function NavBar() {
             <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-red-500 transition-all duration-300 group-hover:w-full"></span>
           </a>
 
-          <a href="#" className="flex items-center space-x-2 relative group">
+          <Link to="/register"  className="flex items-center space-x-2 relative group">
             <UserPlus className="w-5 h-5" />
             <span className="hidden md:inline">REGISTER</span>
             <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-red-500 transition-all duration-300 group-hover:w-full"></span>
-          </a>
+          </Link>
 
           <a href="#" className="flex items-center space-x-2 relative group">
             <LogIn className="w-5 h-5" />

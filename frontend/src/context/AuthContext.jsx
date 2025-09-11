@@ -1,30 +1,19 @@
-// src/context/AuthContext.jsx
+// context/AuthContext.jsx
 import { createContext, useContext, useState } from "react";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext({}); // not null
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // You can expand later: load from localStorage, fetch from API, etc.
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
+  const login = (userData) => setUser(userData);
+  const logout = () => setUser(null);
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-// ✅ This is the missing export
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);

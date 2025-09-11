@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 import img1 from "../assets/slider/img1.jpg";
 import img2 from "../assets/slider/img2.jpg";
@@ -97,9 +98,9 @@ export default function ImageCarousel() {
 
         {/* CTA Buttons */}
         <div className="flex space-x-6">
-          <button className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-lg transform transition duration-300 hover:scale-105">
+          <Link to="/register" className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-lg transform transition duration-300 hover:scale-105">
             REGISTER NOW
-          </button>
+          </Link>
           <button className="px-8 py-3 border border-white hover:bg-white/50 text-white font-bold rounded-2xl shadow-lg transform transition duration-300 hover:scale-105">
             LOGIN
           </button>
