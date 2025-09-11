@@ -1,0 +1,7 @@
+django
+djangorestframework
+environs
+django-phonenumber-field[phonenumbers]
+phonenumbers
+psycopg2
+pillow
