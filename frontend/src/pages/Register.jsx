@@ -6,6 +6,7 @@ import { User, FileText, ShieldCheck, CheckCircle } from "lucide-react";
 const Register = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({}); // server-side errors
 
   const initialFormState = {
     full_name: "",
@@ -19,7 +20,7 @@ const Register = () => {
     phone_no: "",
     photo: null,
     id_card: null,
-    consent: false,
+    consent_given: false,
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -42,31 +43,67 @@ const Register = () => {
   const normalizePhone = (phone) => {
     if (!phone) return "";
     if (phone.startsWith("+")) return phone;
-    if (phone.startsWith("0")) {
-      return `+63${phone.substring(1)}`;
-    }
+    if (phone.startsWith("0")) return `+63${phone.substring(1)}`;
     return phone;
+  };
+
+  // Client-side validation per step
+  const validateStep = () => {
+    const stepErrors = {};
+
+    if (step === 1) {
+      if (!formData.full_name) stepErrors.full_name = ["Full Name is required"];
+      if (!formData.gender) stepErrors.gender = ["Gender is required"];
+      if (!formData.birth_date) stepErrors.birth_date = ["Birthdate is required"];
+      if (!formData.civil_status) stepErrors.civil_status = ["Civil Status is required"];
+      if (!formData.address) stepErrors.address = ["Address is required"];
+      if (!formData.phone_no) stepErrors.phone_no = ["Phone Number is required"];
+    }
+
+    if (step === 2) {
+      if (!formData.email) stepErrors.email = ["Email is required"];
+      if (!formData.username) stepErrors.username = ["Username is required"];
+      if (!formData.password || formData.password.length < 8) {
+        stepErrors.password = ["Password must be at least 8 characters"];
+      }
+    }
+
+    if (step === 3) {
+      if (!formData.consent_given) stepErrors.consent_given = ["Consent is required"];
+    }
+
+    setErrors(stepErrors);
+    return Object.keys(stepErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep()) {
+      setStep(step + 1);
+    } else {
+      toast.error("⚠️ Please fix the highlighted errors.");
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateStep()) {
+      toast.error("⚠️ Please fix the highlighted errors.");
+      return;
+    }
+
     setLoading(true);
+    setErrors({});
 
     const payload = new FormData();
-    payload.append("full_name", formData.full_name);
-    payload.append("username", formData.username);
-    payload.append("email", formData.email);
-    payload.append("address", formData.address);
-    payload.append("phone_no", normalizePhone(formData.phone_no));
-    payload.append("password", formData.password);
-    payload.append("gender", formData.gender);
-    payload.append("birth_date", formData.birth_date);
-    payload.append("civil_status", formData.civil_status);
-
-    if (formData.photo) payload.append("photo", formData.photo);
-    if (formData.id_card) payload.append("id_card", formData.id_card);
-
-    payload.append("consent_given", formData.consent ? "true" : "false");
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null && value !== "") {
+        if (key === "phone_no") {
+          payload.append(key, normalizePhone(value));
+        } else {
+          payload.append(key, value);
+        }
+      }
+    });
 
     try {
       const response = await fetch("http://127.0.0.1:8000/register/", {
@@ -78,7 +115,8 @@ const Register = () => {
 
       if (!response.ok) {
         console.error("Validation errors:", data);
-        toast.error("⚠️ Please check your inputs and try again.");
+        setErrors(data); // server field errors
+        toast.error("⚠️ Please fix the highlighted errors.");
       } else {
         console.log("✅ Registration successful:", data);
         toast.success("🎉 Registration submitted successfully!");
@@ -86,7 +124,7 @@ const Register = () => {
         setStep(1);
       }
     } catch (error) {
-      console.error("Validation errors:", JSON.stringify(error.response?.data, null, 2));
+      console.error("Error:", error);
       toast.error("Server error. Please try again later.");
     } finally {
       setLoading(false);
@@ -130,84 +168,75 @@ const Register = () => {
         {step === 1 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
-            <div className="mb-3">
-              <label className="block mb-1">Full Name</label>
-              <input
-                type="text"
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-                required
-              />
-            </div>
+            <input
+              type="text"
+              name="full_name"
+              value={formData.full_name}
+              onChange={handleChange}
+              placeholder="Full Name"
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            />
+            {errors.full_name && <p className="text-red-500 text-sm">{errors.full_name[0]}</p>}
 
-            <div className="mb-3">
-              <label className="block mb-1">Gender</label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-                required
-              >
-                <option value="">Select...</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </div>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            >
+              <option value="">Select Gender...</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+            {errors.gender && <p className="text-red-500 text-sm">{errors.gender[0]}</p>}
 
-            <div className="mb-3">
-              <label className="block mb-1">Birthdate</label>
-              <input
-                type="date"
-                name="birth_date"
-                value={formData.birth_date}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-                required
-              />
-            </div>
+            <input
+              type="date"
+              name="birth_date"
+              value={formData.birth_date}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            />
+            {errors.birth_date && <p className="text-red-500 text-sm">{errors.birth_date[0]}</p>}
 
-            <div className="mb-3">
-              <label className="block mb-1">Civil Status</label>
-              <select
-                name="civil_status"
-                value={formData.civil_status}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-                required
-              >
-                <option value="">Select...</option>
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-                <option value="widowed">Widowed</option>
-              </select>
-            </div>
+            <select
+              name="civil_status"
+              value={formData.civil_status}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            >
+              <option value="">Civil Status...</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Widowed">Widowed</option>
+            </select>
+            {errors.civil_status && <p className="text-red-500 text-sm">{errors.civil_status[0]}</p>}
 
-            <div className="mb-3">
-              <label className="block mb-1">Address</label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-                required
-              />
-            </div>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Address"
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            />
+            {errors.address && <p className="text-red-500 text-sm">{errors.address[0]}</p>}
 
-            <div className="mb-3">
-              <label className="block mb-1">Phone No.</label>
-              <input
-                type="tel"
-                name="phone_no"
-                value={formData.phone_no}
-                onChange={handleChange}
-                placeholder="+639123456789"
-                className="w-full p-2 border rounded"
-              />
-            </div>
+            <input
+              type="tel"
+              name="phone_no"
+              value={formData.phone_no}
+              onChange={handleChange}
+              placeholder="+639123456789"
+              className="w-full p-2 border rounded mb-1"
+              required
+            />
+            {errors.phone_no && <p className="text-red-500 text-sm">{errors.phone_no[0]}</p>}
           </div>
         )}
 
@@ -216,27 +245,28 @@ const Register = () => {
           <div>
             <h2 className="text-lg font-semibold mb-4">Account & Identity</h2>
             <div className="mb-3">
+              <label className="block mb-1">Email Address</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email"
+                className="w-full border px-3 py-2 rounded mb-1"
+                required
+              />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email[0]}</p>}
+
               <label className="block mb-1">Username</label>
               <input
                 type="text"
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
+                className="w-full border px-3 py-2 rounded mb-1"
                 required
               />
-            </div>
-
-            <div className="mb-3">
-              <label className="block mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-                required
-              />
+              {errors.username && <p className="text-red-500 text-sm">{errors.username[0]}</p>}
             </div>
 
             <div className="mb-3">
@@ -247,24 +277,25 @@ const Register = () => {
                 value={formData.password}
                 minLength={8}
                 onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
+                className="w-full border px-3 py-2 rounded mb-1"
                 required
               />
+              {errors.password && <p className="text-red-500 text-sm">{errors.password[0]}</p>}
             </div>
 
             <div className="mb-3">
-              <label className="block mb-1">Photo (Selfie)</label>
+              <label className="block mb-1">Photo</label>
               <input
                 type="file"
                 name="photo"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="w-full border px-3 py-2 rounded"
+                className="w-full border px-3 py-2 rounded mb-1"
               />
             </div>
 
             <div className="mb-3">
-              <label className="block mb-1">National ID / Driver’s License</label>
+              <label className="block mb-1">ID Card</label>
               <input
                 type="file"
                 name="id_card"
@@ -287,13 +318,16 @@ const Register = () => {
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                name="consent"
-                checked={formData.consent}
+                name="consent_given"
+                checked={formData.consent_given}
                 onChange={handleChange}
                 required
               />
               <span>I give my consent.</span>
             </label>
+            {errors.consent_given && (
+              <p className="text-red-500 text-sm">{errors.consent_given[0]}</p>
+            )}
           </div>
         )}
 
@@ -309,7 +343,7 @@ const Register = () => {
               <li><strong>Username:</strong> {formData.username}</li>
               <li><strong>Email:</strong> {formData.email}</li>
               <li><strong>Address:</strong> {formData.address}</li>
-              <li><strong>Phone No:</strong> {normalizePhone(formData.phone_no)}</li>
+              <li><strong>Phone:</strong> {normalizePhone(formData.phone_no)}</li>
               <li>
                 <strong>Photo:</strong>{" "}
                 {formData.photo && (
@@ -336,7 +370,6 @@ const Register = () => {
 
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-6">
-          {/* Back button (hidden on step 1) */}
           {step > 1 ? (
             <button
               type="button"
@@ -346,14 +379,13 @@ const Register = () => {
               Back
             </button>
           ) : (
-            <span /> // keeps spacing when no back button
+            <span />
           )}
 
-          {/* Next or Submit */}
           {step < 4 ? (
             <button
               type="button"
-              onClick={() => setStep(step + 1)}
+              onClick={handleNext}
               className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
               Next

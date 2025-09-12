@@ -5,19 +5,8 @@ from django.contrib.auth.hashers import make_password
 
 
 class PendingRegistration(models.Model):
-    # --- Choices ---
-    GENDER_CHOICES = [
-        ("male", "Male"),
-        ("female", "Female"),
-       
-    ]
-
-    CIVIL_STATUS_CHOICES = [
-        ("single", "Single"),
-        ("married", "Married"),
-        ("widowed", "Widowed"),
-       
-    ]
+  
+   
 
     # --- Credentials ---
     username = models.CharField(max_length=150, unique=True)
@@ -26,8 +15,8 @@ class PendingRegistration(models.Model):
 
     # --- Personal info ---
     full_name = models.CharField(max_length=255)
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
-    civil_status = models.CharField(max_length=20, choices=CIVIL_STATUS_CHOICES)
+    gender = models.CharField(max_length=10)
+    civil_status = models.CharField(max_length=20)
     birth_date = models.DateField()
     address = models.TextField()
     phone_no = PhoneNumberField(unique=True)
