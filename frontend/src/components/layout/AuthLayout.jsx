@@ -1,3 +1,4 @@
+// components/layout/AuthLayout.jsx
 import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import ImageCarousel from "../../components/ImageCarousel";
@@ -18,6 +19,7 @@ function AuthLayout() {
       {showCarousel && (
         <header>
           <ImageCarousel />
+          
         </header>
       )}
 
