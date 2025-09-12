@@ -1,5 +1,6 @@
 import { Globe, Phone, UserPlus, LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
+import ImageCarousel from "../ImageCarousel";
 
 
 export default function NavBar() {
@@ -7,10 +8,10 @@ export default function NavBar() {
     <nav className="absolute top-0 left-0 w-full bg-blue-800 text-white shadow-md z-20">
       <div className="mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo + Title */}
-        <div className="flex items-center space-x-3">
-        <img src="/public/socdlogo.png" alt="Logo" className="w-8 h-8" />
+        <Link to="/" className="flex items-center space-x-3">
+        <img src="/public/socdlogo.png"  alt="Logo" className="w-8 h-8" />
           <span className="font-black text-lg">DRIVER PORTAL</span>
-        </div>
+        </Link>
 
         {/* Links */}
         <div className="flex space-x-8 text-lg font-medium">

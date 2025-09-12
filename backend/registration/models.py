@@ -1,11 +1,11 @@
-# registration\models.py
-
 # registration/models.py
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.hashers import make_password
 
+
 class PendingRegistration(models.Model):
+    # --- Choices ---
     GENDER_CHOICES = [
         ("male", "Male"),
         ("female", "Female"),
@@ -19,31 +19,32 @@ class PendingRegistration(models.Model):
        
     ]
 
-    # Credentials
-    username = models.CharField(max_length=150, unique=True, null=True)
-    email = models.EmailField(unique=True, null=True)
-    password = models.CharField(max_length=128, null=True)  # will store hashed
+    # --- Credentials ---
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)  # store hashed password only
 
-    # Personal info
-    full_name = models.CharField(max_length=255, blank=True, null=True)
+    # --- Personal info ---
+    full_name = models.CharField(max_length=255)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
-    civil_status = models.CharField(max_length=20, choices=CIVIL_STATUS_CHOICES)   
-    birth_date = models.DateField(blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-    phone_no = PhoneNumberField(null=False, blank=False, unique=True)
+    civil_status = models.CharField(max_length=20, choices=CIVIL_STATUS_CHOICES)
+    birth_date = models.DateField()
+    address = models.TextField()
+    phone_no = PhoneNumberField(unique=True)
 
-    # Uploads
+    # --- Uploads ---
     photo = models.ImageField(upload_to="users/photos/")
     id_card = models.ImageField(upload_to="users/id_cards/")
 
-    # Consent
-    consent_given = models.BooleanField(default=False)    
+    # --- Consent ---
+    consent_given = models.BooleanField(default=False)
 
-    # Metadata
+    # --- Metadata ---
     submitted_at = models.DateTimeField(auto_now_add=True)
 
+    # --- Save override ---
     def save(self, *args, **kwargs):
-        # Ensure password is hashed before saving
+        # Always hash plain-text passwords before saving
         if self.password and not self.password.startswith("pbkdf2_"):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)

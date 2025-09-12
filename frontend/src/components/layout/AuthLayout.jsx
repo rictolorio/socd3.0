@@ -18,13 +18,12 @@ function AuthLayout() {
       {/* Carousel only on "/" */}
       {showCarousel && (
         <header>
-          <ImageCarousel />
-          
+          <ImageCarousel />          
         </header>
       )}
 
       {/* This is where Login / Register will render */}
-      <main className="p-6">
+      <main className="p-6 h-screen bg-blue-700/50">         
         <Outlet />
       </main>
     </div>

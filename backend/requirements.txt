@@ -5,3 +5,4 @@ django-phonenumber-field[phonenumbers]
 phonenumbers
 psycopg2
 pillow
+django-cors-headers

@@ -10,13 +10,13 @@ const Register = () => {
   const initialFormState = {
     full_name: "",
     gender: "",
-    birthdate: "",
+    birth_date: "",
     civil_status: "",
     username: "",
     email: "",
     password: "",
     address: "",
-    mobile_number: "",
+    phone_no: "",
     photo: null,
     id_card: null,
     consent: false,
@@ -39,30 +39,55 @@ const Register = () => {
     });
   };
 
+  const normalizePhone = (phone) => {
+    if (!phone) return "";
+    if (phone.startsWith("+")) return phone;
+    if (phone.startsWith("0")) {
+      return `+63${phone.substring(1)}`;
+    }
+    return phone;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const payload = new FormData();
-    Object.keys(formData).forEach((key) => {
-      payload.append(key, formData[key]);
-    });
+    payload.append("full_name", formData.full_name);
+    payload.append("username", formData.username);
+    payload.append("email", formData.email);
+    payload.append("address", formData.address);
+    payload.append("phone_no", normalizePhone(formData.phone_no));
+    payload.append("password", formData.password);
+    payload.append("gender", formData.gender);
+    payload.append("birth_date", formData.birth_date);
+    payload.append("civil_status", formData.civil_status);
+
+    if (formData.photo) payload.append("photo", formData.photo);
+    if (formData.id_card) payload.append("id_card", formData.id_card);
+
+    payload.append("consent_given", formData.consent ? "true" : "false");
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/register/", {
+      const response = await fetch("http://127.0.0.1:8000/register/", {
         method: "POST",
         body: payload,
       });
 
-      if (res.ok) {
-        toast.success("✅ Registration submitted for approval!");
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Validation errors:", data);
+        toast.error("⚠️ Please check your inputs and try again.");
+      } else {
+        console.log("✅ Registration successful:", data);
+        toast.success("🎉 Registration submitted successfully!");
         setFormData(initialFormState);
         setStep(1);
-      } else {
-        toast.error("❌ Failed to submit registration.");
       }
-    } catch (err) {
-      toast.error("⚠ Server error, please try again.");
+    } catch (error) {
+      console.error("Validation errors:", JSON.stringify(error.response?.data, null, 2));
+      toast.error("Server error. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -76,7 +101,7 @@ const Register = () => {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg mt-20 ">
+    <div className="max-w-2xl mx-auto p-6 bg-white border border-blue-700/50 shadow-2xl rounded-lg mt-20">
       {/* Progress Steps */}
       <div className="flex justify-between mb-6">
         {steps.map((s) => (
@@ -88,7 +113,9 @@ const Register = () => {
           >
             <div
               className={`p-2 rounded-full border ${
-                step === s.id ? "bg-indigo-100 border-indigo-600" : "bg-gray-100 border-gray-300"
+                step === s.id
+                  ? "bg-indigo-100 border-indigo-600"
+                  : "bg-gray-100 border-gray-300"
               }`}
             >
               {s.icon}
@@ -125,9 +152,8 @@ const Register = () => {
                 required
               >
                 <option value="">Select...</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
               </select>
             </div>
 
@@ -135,8 +161,8 @@ const Register = () => {
               <label className="block mb-1">Birthdate</label>
               <input
                 type="date"
-                name="birthdate"
-                value={formData.birthdate}
+                name="birth_date"
+                value={formData.birth_date}
                 onChange={handleChange}
                 className="w-full border px-3 py-2 rounded"
                 required
@@ -153,9 +179,9 @@ const Register = () => {
                 required
               >
                 <option value="">Select...</option>
-                <option value="Single">Single</option>
-                <option value="Married">Married</option>
-                <option value="Widowed">Widowed</option>
+                <option value="single">Single</option>
+                <option value="married">Married</option>
+                <option value="widowed">Widowed</option>
               </select>
             </div>
 
@@ -172,17 +198,16 @@ const Register = () => {
             </div>
 
             <div className="mb-3">
-              <label className="block mb-1">Mobile</label>
+              <label className="block mb-1">Phone No.</label>
               <input
                 type="tel"
-                name="mobile_number"
-                value={formData.mobile_number}
+                name="phone_no"
+                value={formData.phone_no}
                 onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-                required
+                placeholder="+639123456789"
+                className="w-full p-2 border rounded"
               />
             </div>
-
           </div>
         )}
 
@@ -220,11 +245,12 @@ const Register = () => {
                 type="password"
                 name="password"
                 value={formData.password}
+                minLength={8}
                 onChange={handleChange}
                 className="w-full border px-3 py-2 rounded"
                 required
               />
-            </div>            
+            </div>
 
             <div className="mb-3">
               <label className="block mb-1">Photo (Selfie)</label>
@@ -255,49 +281,8 @@ const Register = () => {
           <div>
             <h2 className="text-lg font-semibold mb-4">Privacy & Consent</h2>
             <p className="text-sm mb-4 text-gray-600 border p-3 rounded bg-gray-50">
-              We value your privacy. In compliance with Republic Act No. 10173 (Data Privacy Act of 2012), we inform you that the following personal information may be collected and processed through this application:
-
-Full name
-
-Address
-
-Gender
-
-Date of birth
-
-Driver’s license number
-
-National ID number
-
-Photograph
-
-Violation details
-
-Purpose of Collection
-Your personal information is collected for the purpose of recording and managing traffic violations as mandated by local government traffic regulations. The data will be used to identify violators, generate violation records, and assist in enforcing penalties or clearances.
-
-Data Access and Sharing
-Your personal information will only be accessed by authorized traffic enforcers, city administrators, and relevant government authorities. It will not be shared with unauthorized third parties without your consent, unless required by law.
-
-Data Retention
-Your personal information will be stored securely and retained only for as long as necessary to fulfill the purposes stated, or as required by applicable laws and regulations.
-
-Your Rights
-Under the Data Privacy Act, you have the right to:
-
-Be informed of how your data is used.
-
-Access and request a copy of your personal data.
-
-Correct or update inaccurate information.
-
-Request deletion, blocking, or withdrawal of consent (unless processing is required by law).
-
-File complaints with the National Privacy Commission (NPC) if your rights are violated.
-
-{/* For any questions, requests, or concerns regarding your personal data, you may contact our Data Protection Officer (DPO) at:
-📧 Email: [Insert DPO Email]
-📞 Contact Number: [Insert DPO Phone] */}
+              By registering, you agree to the collection and processing of your
+              personal data in accordance with RA 10173 (Data Privacy Act of 2012).
             </p>
             <label className="flex items-center space-x-2">
               <input
@@ -319,12 +304,12 @@ File complaints with the National Privacy Commission (NPC) if your rights are vi
             <ul className="text-sm space-y-2">
               <li><strong>Name:</strong> {formData.full_name}</li>
               <li><strong>Gender:</strong> {formData.gender}</li>
-              <li><strong>Birthdate:</strong> {formData.birthdate}</li>
+              <li><strong>Birthdate:</strong> {formData.birth_date}</li>
               <li><strong>Status:</strong> {formData.civil_status}</li>
               <li><strong>Username:</strong> {formData.username}</li>
               <li><strong>Email:</strong> {formData.email}</li>
               <li><strong>Address:</strong> {formData.address}</li>
-              <li><strong>Mobile:</strong> {formData.mobile_number}</li>
+              <li><strong>Phone No:</strong> {normalizePhone(formData.phone_no)}</li>
               <li>
                 <strong>Photo:</strong>{" "}
                 {formData.photo && (
@@ -351,29 +336,33 @@ File complaints with the National Privacy Commission (NPC) if your rights are vi
 
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-6">
-          {step > 1 && (
+          {/* Back button (hidden on step 1) */}
+          {step > 1 ? (
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              className="px-4 py-2 bg-gray-200 rounded"
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
             >
               Back
             </button>
+          ) : (
+            <span /> // keeps spacing when no back button
           )}
-          {step < 4 && (
+
+          {/* Next or Submit */}
+          {step < 4 ? (
             <button
               type="button"
               onClick={() => setStep(step + 1)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded"
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
               Next
             </button>
-          )}
-          {step === 4 && (
+          ) : (
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-green-600 text-white rounded"
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
             >
               {loading ? "Submitting..." : "Submit"}
             </button>
