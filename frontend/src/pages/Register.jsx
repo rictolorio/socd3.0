@@ -1,12 +1,13 @@
 // src/pages/Register.jsx
 import React, { useState } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { User, FileText, ShieldCheck, CheckCircle } from "lucide-react";
 
 const Register = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({}); // server-side errors
+  const [errors, setErrors] = useState({});
 
   const initialFormState = {
     full_name: "",
@@ -47,7 +48,7 @@ const Register = () => {
     return phone;
   };
 
-  // Client-side validation per step
+  // 🔹 Validation per step
   const validateStep = () => {
     const stepErrors = {};
 
@@ -73,23 +74,26 @@ const Register = () => {
     }
 
     setErrors(stepErrors);
+
+    // show toasts per field
+    if (Object.keys(stepErrors).length > 0) {
+      Object.entries(stepErrors).forEach(([field, msgs]) => {
+        toast.error(`${field.replace("_", " ")}: ${msgs[0]}`);
+      });
+    }
+
     return Object.keys(stepErrors).length === 0;
   };
 
   const handleNext = () => {
     if (validateStep()) {
       setStep(step + 1);
-    } else {
-      toast.error("⚠️ Please fix the highlighted errors.");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateStep()) {
-      toast.error("⚠️ Please fix the highlighted errors.");
-      return;
-    }
+    if (!validateStep()) return;
 
     setLoading(true);
     setErrors({});
@@ -114,11 +118,11 @@ const Register = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error("Validation errors:", data);
-        setErrors(data); // server field errors
-        toast.error("⚠️ Please fix the highlighted errors.");
+        setErrors(data);
+        Object.entries(data).forEach(([field, msgs]) => {
+          toast.error(`${field.replace("_", " ")}: ${msgs[0]}`);
+        });
       } else {
-        console.log("✅ Registration successful:", data);
         toast.success("🎉 Registration submitted successfully!");
         setFormData(initialFormState);
         setStep(1);
@@ -140,6 +144,8 @@ const Register = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white border border-blue-700/50 shadow-2xl rounded-lg mt-20">
+      <ToastContainer position="top-right" autoClose={3000} />
+
       {/* Progress Steps */}
       <div className="flex justify-between mb-6">
         {steps.map((s) => (
@@ -164,7 +170,7 @@ const Register = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        {/* STEP 1 - Personal Info */}
+            {/* STEP 1 - Personal Info */}
         {step === 1 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
@@ -367,7 +373,6 @@ const Register = () => {
             </ul>
           </div>
         )}
-
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-6">
           {step > 1 ? (
@@ -382,25 +387,24 @@ const Register = () => {
             <span />
           )}
 
-         {step < 4 ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-          >
-            Next
-          </button>
-        ) : (
-          <button
-            type="button"   // ⬅️ changed from submit to button
-            onClick={handleSubmit}  // ⬅️ manually call submit
-            disabled={loading}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-          >
-            {loading ? "Submitting..." : "Submit"}
-          </button>
-        )}
-
+          {step < 4 ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="button" // manual submit
+              onClick={handleSubmit}
+              disabled={loading}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              {loading ? "Submitting..." : "Submit"}
+            </button>
+          )}
         </div>
       </form>
     </div>
