@@ -382,23 +382,25 @@ const Register = () => {
             <span />
           )}
 
-          {step < 4 ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
-          )}
+         {step < 4 ? (
+          <button
+            type="button"
+            onClick={handleNext}
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          >
+            Next
+          </button>
+        ) : (
+          <button
+            type="button"   // ⬅️ changed from submit to button
+            onClick={handleSubmit}  // ⬅️ manually call submit
+            disabled={loading}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+          >
+            {loading ? "Submitting..." : "Submit"}
+          </button>
+        )}
+
         </div>
       </form>
     </div>
