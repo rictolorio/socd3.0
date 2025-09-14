@@ -23,8 +23,8 @@ function AuthLayout() {
       )}
 
       {/* This is where Login / Register will render */}
-      <main className="p-6 h-screen bg-blue-700/50">         
-        <Outlet />
+      <main className="mt-50">         
+         <Outlet />   
       </main>
     </div>
   );

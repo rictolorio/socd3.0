@@ -22,10 +22,8 @@ class PendingRegistration(models.Model):
     phone_no = PhoneNumberField(unique=True)
 
     # --- Uploads ---
-    photo = models.ImageField(upload_to="users/photos/")
-    id_card = models.ImageField(upload_to="users/id_cards/")
-
-    # --- Consent ---
+    photo = models.ImageField(upload_to="selfies/", null=True, blank=True)
+    id_card = models.ImageField(upload_to="id_cards/", null=True, blank=True)
     consent_given = models.BooleanField(default=False)
 
     # --- Metadata ---
