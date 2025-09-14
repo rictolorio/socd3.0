@@ -23,7 +23,7 @@ function AuthLayout() {
       )}
 
       {/* This is where Login / Register will render */}
-      <main className="mt-50">         
+      <main className="">         
          <Outlet />   
       </main>
     </div>

@@ -50,23 +50,23 @@ const Register = () => {
 
   // 🔹 Validation per step
   const validateStep = () => {
-    const stepErrors = {};
+    const stepErrors = {};    
 
     if (step === 1) {
+      if (!formData.email) stepErrors.email = ["Email is required"];
+      if (!formData.username) stepErrors.username = ["Username is required"];
+      if (!formData.password || formData.password.length < 8) {
+        stepErrors.password = ["Password must be at least 8 characters"];
+      }
+    }
+
+    if (step === 2) {
       if (!formData.full_name) stepErrors.full_name = ["Full Name is required"];
       if (!formData.gender) stepErrors.gender = ["Gender is required"];
       if (!formData.birth_date) stepErrors.birth_date = ["Birthdate is required"];
       if (!formData.civil_status) stepErrors.civil_status = ["Civil Status is required"];
       if (!formData.address) stepErrors.address = ["Address is required"];
       if (!formData.phone_no) stepErrors.phone_no = ["Phone Number is required"];
-    }
-
-    if (step === 2) {
-      if (!formData.email) stepErrors.email = ["Email is required"];
-      if (!formData.username) stepErrors.username = ["Username is required"];
-      if (!formData.password || formData.password.length < 8) {
-        stepErrors.password = ["Password must be at least 8 characters"];
-      }
     }
 
     if (step === 3) {
@@ -135,15 +135,27 @@ const Register = () => {
     }
   };
 
-  const steps = [
-    { id: 1, title: "Personal Info", icon: <User className="w-5 h-5" /> },
-    { id: 2, title: "Account & Identity", icon: <FileText className="w-5 h-5" /> },
-    { id: 3, title: "Privacy & Consent", icon: <ShieldCheck className="w-5 h-5" /> },
-    { id: 4, title: "Review & Submit", icon: <CheckCircle className="w-5 h-5" /> },
-  ];
+  function formatTitle(title) {
+  const words = title.split(" ");
+  if (words.length > 1) {
+    return (
+      <>
+        {words[0]} <br /> {words.slice(1).join(" ")}
+      </>
+    );
+  }
+  return title;
+}
+
+const steps = [    
+  { id: 1, title: "Account & Identity", icon: <FileText className="w-5 h-5" /> },
+  { id: 2, title: "Personal Info", icon: <User className="w-5 h-5" /> },  
+  { id: 3, title: "Privacy & Consent", icon: <ShieldCheck className="w-5 h-5" /> },
+  { id: 4, title: "Review & Submit", icon: <CheckCircle className="w-5 h-5" /> },
+];
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white border border-blue-700/50 shadow-2xl rounded-lg mt-20">
+    <div className="max-w-2xl mx-auto p-6 bg-white border border-blue-700/50 shadow-2xl rounded-lg mt-20 md:mt-28">
       <ToastContainer position="top-right" autoClose={3000} />
 
       {/* Progress Steps */}
@@ -169,85 +181,10 @@ const Register = () => {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit}>
-            {/* STEP 1 - Personal Info */}
+      <form onSubmit={handleSubmit}>       
+
+        {/* STEP 1 - Account & Identity */}
         {step === 1 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
-            <input
-              type="text"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              placeholder="Full Name"
-              className="w-full border px-3 py-2 rounded mb-1"
-              required
-            />
-            {errors.full_name && <p className="text-red-500 text-sm">{errors.full_name[0]}</p>}
-
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded mb-1"
-              required
-            >
-              <option value="">Select Gender...</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-            {errors.gender && <p className="text-red-500 text-sm">{errors.gender[0]}</p>}
-
-            <input
-              type="date"
-              name="birth_date"
-              value={formData.birth_date}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded mb-1"
-              required
-            />
-            {errors.birth_date && <p className="text-red-500 text-sm">{errors.birth_date[0]}</p>}
-
-            <select
-              name="civil_status"
-              value={formData.civil_status}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded mb-1"
-              required
-            >
-              <option value="">Civil Status...</option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
-              <option value="Widowed">Widowed</option>
-            </select>
-            {errors.civil_status && <p className="text-red-500 text-sm">{errors.civil_status[0]}</p>}
-
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Address"
-              className="w-full border px-3 py-2 rounded mb-1"
-              required
-            />
-            {errors.address && <p className="text-red-500 text-sm">{errors.address[0]}</p>}
-
-            <input
-              type="tel"
-              name="phone_no"
-              value={formData.phone_no}
-              onChange={handleChange}
-              placeholder="+639123456789"
-              className="w-full p-2 border rounded mb-1"
-              required
-            />
-            {errors.phone_no && <p className="text-red-500 text-sm">{errors.phone_no[0]}</p>}
-          </div>
-        )}
-
-        {/* STEP 2 - Account & Identity */}
-        {step === 2 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Account & Identity</h2>
             <div className="mb-3">
@@ -310,6 +247,88 @@ const Register = () => {
                 className="w-full border px-3 py-2 rounded"
               />
             </div>
+          </div>
+        )}
+
+        {/* STEP 2 - Personal Info */}
+        {step === 2 && (
+          <div>            
+            <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
+            <label className="block mb-1">Full Name</label>
+            <input
+              type="text"
+              name="full_name"
+              value={formData.full_name}
+              onChange={handleChange}
+              placeholder="Full Name"
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            />
+            {errors.full_name && <p className="text-red-500 text-sm">{errors.full_name[0]}</p>}
+            
+            <label className="block mb-1">Gender</label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            >
+              <option value="">Select Gender...</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+            {errors.gender && <p className="text-red-500 text-sm">{errors.gender[0]}</p>}
+
+            <label className="block mb-1">Birth date</label>
+            <input
+              type="date"
+              name="birth_date"
+              value={formData.birth_date}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            />
+            {errors.birth_date && <p className="text-red-500 text-sm">{errors.birth_date[0]}</p>}
+
+            <label className="block mb-1">Civil Status</label>
+            <select
+              name="civil_status"
+              value={formData.civil_status}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            >
+              <option value="">Civil Status...</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Widowed">Widowed</option>
+            </select>
+            {errors.civil_status && <p className="text-red-500 text-sm">{errors.civil_status[0]}</p>}
+
+            <label className="block mb-1">Address</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Address"
+              className="w-full border px-3 py-2 rounded mb-1"
+              required
+            />
+            {errors.address && <p className="text-red-500 text-sm">{errors.address[0]}</p>}
+
+            <label className="block mb-1">Phone no.</label>
+            <input
+              type="tel"
+              name="phone_no"
+              value={formData.phone_no}
+              onChange={handleChange}
+              placeholder="+639123456789"
+              className="w-full p-2 border rounded mb-1"
+              required
+            />
+            {errors.phone_no && <p className="text-red-500 text-sm">{errors.phone_no[0]}</p>}
           </div>
         )}
 
