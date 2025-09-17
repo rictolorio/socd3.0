@@ -110,7 +110,7 @@ const Register = () => {
     });
 
     try {
-      const response = await fetch("http://192.168.101.14:8000/register/", {
+      const response = await fetch("http://192.168.20.5:8000/register/", {
         method: "POST",
         body: payload,
       });

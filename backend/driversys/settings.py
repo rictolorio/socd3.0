@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-fd0e5va$&xxw2t_@hm$dva)(iww4-q#b#_5y=sseuwerb!_=8h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.101.14']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.101.14', '192.168.20.5']
 
 
 
@@ -135,7 +135,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-     "http://192.168.101.14:5173",  # <-- your PC IP with Vite
+    "http://192.168.101.14:5173",  # <-- your PC IP with Vite
+    "http://192.168.20.5:5173",  # <-- your PC IP with Vite
 ]
 
 MEDIA_URL = '/media/'
